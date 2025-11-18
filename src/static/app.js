@@ -13,6 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // small helper to avoid injection when rendering names
+      const escapeHtml = (str) =>
+        String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -20,14 +24,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // build participants HTML: show avatar initials + name, or fallback
+        const participantsListHTML =
+          details.participants && details.participants.length
+            ? details.participants
+                .map((p) => {
+                  const initials = String(p)
+                    .split(" ")
+                    .map((s) => s[0] || "")
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+                  return `<li><span class="avatar">${escapeHtml(initials)}</span><span class="participant-name">${escapeHtml(
+                    p
+                  )}</span></li>`;
+                })
+                .join("")
+            : '<li class="no-participants">No participants yet</li>';
+
         activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
+          <h4>${escapeHtml(name)}</h4>
+          <p>${escapeHtml(details.description)}</p>
+          <p><strong>Schedule:</strong> ${escapeHtml(details.schedule)}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
           <p><strong>Participants:</strong></p>
-          <ul>
-            ${details.participants.map(participant => `<li>${participant}</li>`).join('')}
+          <ul class="participants-list">
+            ${participantsListHTML}
           </ul>
         `;
 
