@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .toUpperCase();
                   return `<li><span class="avatar">${escapeHtml(initials)}</span><span class="participant-name">${escapeHtml(
                     p
-                  )}</span></li>`;
+                  )}</span><span class="delete-participant" title="Remove participant" data-activity="${escapeHtml(name)}" data-participant="${escapeHtml(p)}">&#128465;</span></li>`;
                 })
                 .join("")
             : '<li class="no-participants">No participants yet</li>';
@@ -53,7 +53,29 @@ document.addEventListener("DOMContentLoaded", () => {
           </ul>
         `;
 
+
         activitiesList.appendChild(activityCard);
+
+        // Add delete icon event listeners for this card
+        const deleteIcons = activityCard.querySelectorAll('.delete-participant');
+        deleteIcons.forEach((icon) => {
+          icon.addEventListener('click', async (e) => {
+            const activityName = icon.getAttribute('data-activity');
+            const participant = icon.getAttribute('data-participant');
+            if (!activityName || !participant) return;
+            if (!confirm(`Remove ${participant} from ${activityName}?`)) return;
+            try {
+              const response = await fetch(`/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(participant)}`, { method: 'DELETE' });
+              if (response.ok) {
+                fetchActivities();
+              } else {
+                alert('Failed to remove participant.');
+              }
+            } catch (err) {
+              alert('Error removing participant.');
+            }
+          });
+        });
 
         // Add option to select dropdown
         const option = document.createElement("option");
@@ -88,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";

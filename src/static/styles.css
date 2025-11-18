@@ -76,8 +76,20 @@ section h3 {
 
 /* Replace the generic list styles with a styled participants list */
 .activity-card .participants-list {
-  list-style-type: disc;
-  padding-left: 34px;
+  list-style-type: none;
+  padding-left: 0;
+  /* Delete icon for participant */
+  .activity-card .participants-list .delete-participant {
+    margin-left: auto;
+    color: #c62828;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 6px;
+    transition: color 0.2s;
+  }
+  .activity-card .participants-list .delete-participant:hover {
+    color: #b71c1c;
+  }
   margin-top: 12px;
   margin-bottom: 0;
 }
